@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Consentimiento;
 use App\Http\Requests\StoreConsentimientoRequest;
 use App\Http\Requests\UpdateConsentimientoRequest;
+use Illuminate\Http\JsonResponse;
 
 class ConsentimientoController extends Controller
 {
@@ -29,7 +30,9 @@ class ConsentimientoController extends Controller
      */
     public function store(StoreConsentimientoRequest $request)
     {
-        //
+        $consentimiento = Consentimiento::create($request->validated());
+
+        return response()->json($consentimiento, 201);
     }
 
     /**
@@ -37,7 +40,23 @@ class ConsentimientoController extends Controller
      */
     public function show(Consentimiento $consentimiento)
     {
-        //
+        return response()->json($consentimiento);
+    }
+
+    /**
+     * Display the specified resource by cedula.
+     */
+    public function showByCedula(string $cedula): JsonResponse
+    {
+        $consentimiento = Consentimiento::where('cedula', $cedula)->first();
+
+        if (! $consentimiento) {
+            return response()->json([
+                'message' => 'Consentimiento no encontrado',
+            ], 404);
+        }
+
+        return response()->json($consentimiento);
     }
 
     /**
