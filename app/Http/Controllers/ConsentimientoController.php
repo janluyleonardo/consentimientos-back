@@ -6,15 +6,24 @@ use App\Models\Consentimiento;
 use App\Http\Requests\StoreConsentimientoRequest;
 use App\Http\Requests\UpdateConsentimientoRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ConsentimientoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        //
+        $telefono = $request->query('telefono');
+
+        if (! $telefono) {
+            return response()->json([
+                'message' => 'Se requiere el parámetro telefono',
+            ], 400);
+        }
+
+        return $this->showByTelefono($telefono);
     }
 
     /**
@@ -44,19 +53,21 @@ class ConsentimientoController extends Controller
     }
 
     /**
-     * Display the specified resource by cedula.
+     * Display the specified resources by telefono.
      */
-    public function showByCedula(string $cedula): JsonResponse
+    public function showByTelefono(string $telefono): JsonResponse
     {
-        $consentimiento = Consentimiento::where('cedula', $cedula)->first();
+        $consentimientos = Consentimiento::where('telefono', $telefono)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        if (! $consentimiento) {
+        if ($consentimientos->isEmpty()) {
             return response()->json([
                 'message' => 'Consentimiento no encontrado',
             ], 404);
         }
 
-        return response()->json($consentimiento);
+        return response()->json($consentimientos);
     }
 
     /**
